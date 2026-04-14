@@ -1,7 +1,10 @@
+using ComicRealmBE.Data;
+using ComicRealmBE.Dtos;
 using ComicRealmBE.Models;
 using ComicRealmBE.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ComicRealmBE.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ComicRealmBE.Controllers;
 
@@ -9,42 +12,36 @@ namespace ComicRealmBE.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    private readonly ComicRealmContext _context;
     private readonly AuthService _authService;
 
-    public AuthController(AuthService authService)
+    public AuthController(ComicRealmContext context, AuthService authService)
     {
+        _context = context;
         _authService = authService;
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest request)
+    [AllowAnonymous]
+    public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto dto)
     {
-        // Replace this with your real DB lookup + password hash verification
-        if (request.Username == "admin" && request.Password == "Password123!")
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == dto.Email && u.IsActive);
+
+        if (user is null || user.PasswordHash != dto.PasswordHash)
         {
-            var user = new User
-            {
-                UserId = 1,
-                Email = "admin@example.com",
-                Role = UserRole.Admin
-            };
-
-            var token = _authService.GenerateJwtToken(user);
-
-            return Ok(new
-            {
-                token,
-                role = user.Role.ToString(),
-                username = user.Email
-            });
+            return Unauthorized(new { message = "Invalid credentials" });
         }
 
-        return Unauthorized(new { message = "Invalid username or password" });
-    }
-}
+        var token = _authService.GenerateJwtToken(user);
 
-public class LoginRequest
-{
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
+        return Ok(new AuthResponseDto
+        {
+            Token = token,
+            UserId = user.UserId,
+            Email = user.Email,
+            Role = user.Role.ToString()
+        });
+    }
 }

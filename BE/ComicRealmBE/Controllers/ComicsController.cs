@@ -1,6 +1,7 @@
 using ComicRealmBE.Data;
 using ComicRealmBE.Dtos;
 using ComicRealmBE.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace ComicRealmBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ComicsController : ControllerBase
     {
         private readonly ComicRealmContext _context;
@@ -18,6 +20,7 @@ namespace ComicRealmBE.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Friend,Admin,SuperAdmin")]
         public async Task<ActionResult<IEnumerable<ComicDto>>> GetAll()
         {
             var comics = await _context.Comics
@@ -38,6 +41,7 @@ namespace ComicRealmBE.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Friend,Admin,SuperAdmin")]
         public async Task<ActionResult<ComicDto>> GetById(int id)
         {
             var comic = await _context.Comics
@@ -59,6 +63,7 @@ namespace ComicRealmBE.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<ComicDto>> Create(CreateComicDto dto)
         {
             var comic = new Comic
@@ -89,6 +94,7 @@ namespace ComicRealmBE.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<ComicDto>> Update(int id, UpdateComicDto dto)
         {
             var comic = await _context.Comics.FindAsync(id);
@@ -117,6 +123,7 @@ namespace ComicRealmBE.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> Delete(int id)
         {
             var comic = await _context.Comics.FindAsync(id);
