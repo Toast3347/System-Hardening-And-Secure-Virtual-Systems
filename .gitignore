@@ -131,3 +131,5 @@ x86/
 
 .pnpm-store/
 node_modules/
+
+.env

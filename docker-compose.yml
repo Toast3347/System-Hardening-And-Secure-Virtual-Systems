@@ -28,6 +28,10 @@ services:
       Database__UserId: admin
       Database__Password: Gr0up3!!!
       Database__Name: comic_realm
+      Jwt__Key: ComicRealm_Docker_Dev_Key_Change_In_Production_2026
+      Jwt__Issuer: ComicRealmBE
+      Jwt__Audience: ComicRealmFE
+      Jwt__ExpiryMinutes: "60"
     depends_on:
       - postgres
     networks:
