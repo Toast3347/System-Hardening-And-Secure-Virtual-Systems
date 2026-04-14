@@ -1,6 +1,7 @@
 using ComicRealmBE.Data;
 using ComicRealmBE.Dtos;
 using ComicRealmBE.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace ComicRealmBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class UsersController : ControllerBase
     {
         private readonly ComicRealmContext _context;
