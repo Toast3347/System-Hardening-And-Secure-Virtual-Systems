@@ -2,9 +2,11 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { UserRole } from '../models/enums/UserRole'
+import { ApiError, apiRequest } from '../api/client'
 import {
   canAccessCreateUserPage,
   canCreateRole,
+  getCurrentUserId,
   getCreatableRolesByActor,
   getCurrentUserRole,
 } from '../auth/roleSession'
@@ -56,10 +58,32 @@ function submitCreateUser(event: Event): void {
     return
   }
 
-  feedback.value = `User ${trimmedEmail} prepared as ${roleLabels[targetRole.value]}. Connect this form to your backend endpoint to persist.`
-  email.value = ''
-  password.value = ''
-  targetRole.value = creatableRoles.value[0] ?? null
+  const actorUserId = getCurrentUserId()
+
+  void apiRequest('/api/Users', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: trimmedEmail,
+      passwordHash: password.value,
+      role: targetRole.value,
+      createdBy: actorUserId,
+      isActive: true,
+    }),
+  })
+    .then(() => {
+      feedback.value = `User ${trimmedEmail} created as ${roleLabels[targetRole.value!]}.`
+      email.value = ''
+      password.value = ''
+      targetRole.value = creatableRoles.value[0] ?? null
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+        return
+      }
+
+      feedback.value = 'Unable to create user right now.'
+    })
 }
 </script>
 

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { UserRole } from '../models/enums/UserRole'
-import { getCurrentUserRole } from '../auth/roleSession'
+import { clearCurrentUserRole, getCurrentUserRole, isSessionExpired } from '../auth/roleSession'
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -10,9 +10,6 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: {
-        requiresAuth: true,
-      },
     },
     {
       path: '/about',
@@ -45,7 +42,12 @@ const router = createRouter({
 router.beforeEach((to) => {
   const requiresAuth = Boolean(to.meta.requiresAuth)
   const allowedRoles = to.meta.allowedRoles as UserRole[] | undefined
-  const currentRole = getCurrentUserRole()
+  let currentRole = getCurrentUserRole()
+
+  if (currentRole !== null && isSessionExpired()) {
+    clearCurrentUserRole()
+    currentRole = null
+  }
 
   if (to.name === 'login' && currentRole !== null) {
     return { name: 'home' }

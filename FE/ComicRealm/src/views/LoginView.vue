@@ -1,23 +1,50 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { roleLabels, setCurrentUserRole } from '../auth/roleSession'
-import { UserRole } from '../models/enums/UserRole'
+import { setAuthSession } from '../auth/roleSession'
+import { ApiError, apiRequest } from '../api/client'
 
 const router = useRouter()
-const selectedRole = ref<UserRole>(UserRole.Friend)
+const username = ref('')
+const password = ref('')
 const feedback = ref('')
 
-const roleOptions = computed(() => [UserRole.SuperAdmin, UserRole.Admin, UserRole.Friend])
+interface LoginResponse {
+  token: string
+  role: string
+  username: string
+}
 
 function submitLogin(event: Event): void {
   event.preventDefault()
   feedback.value = ''
 
-  setCurrentUserRole(selectedRole.value)
+  const trimmedUsername = username.value.trim()
+  if (!trimmedUsername || !password.value) {
+    feedback.value = 'Username and password are required.'
+    return
+  }
 
-  feedback.value = `Logged in as ${roleLabels[selectedRole.value]}.`
-  void router.push({ name: 'home' })
+  void apiRequest<LoginResponse>('/api/Auth/login', {
+    method: 'POST',
+    body: JSON.stringify({
+      username: trimmedUsername,
+      password: password.value,
+    }),
+  })
+    .then((response) => {
+      setAuthSession(response.token)
+      feedback.value = `Logged in as ${response.role}.`
+      void router.push({ name: 'home' })
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+        return
+      }
+
+      feedback.value = 'Login failed. Please try again.'
+    })
 }
 </script>
 
@@ -32,22 +59,13 @@ function submitLogin(event: Event): void {
 
       <form class="login-form" @submit="submitLogin">
         <label>
-          Email
-          <input type="email" placeholder="you@example.com" required />
+          Username
+          <input v-model="username" type="text" placeholder="admin" required />
         </label>
 
         <label>
           Password
-          <input type="password" placeholder="Enter your password" required />
-        </label>
-
-        <label>
-          Role
-          <select v-model="selectedRole">
-            <option v-for="role in roleOptions" :key="role" :value="role">
-              {{ roleLabels[role] }}
-            </option>
-          </select>
+          <input v-model="password" type="password" placeholder="Enter your password" required />
         </label>
 
         <button type="submit">Login</button>

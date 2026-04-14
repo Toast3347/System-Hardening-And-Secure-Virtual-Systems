@@ -1,17 +1,27 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { ApiError, apiRequest } from '../api/client'
 import {
   canAccessCreateUserPage,
   canManageComics,
   canViewComics,
   clearCurrentUserRole,
+  getCurrentUserId,
   getCurrentUserRole,
+  isSessionExpired,
   roleLabels,
 } from '../auth/roleSession'
 import { UserRole } from '../models/enums/UserRole'
 
 interface ComicItem {
+  comicId: number
+  serie: string
+  number: string
+  title: string
+}
+
+interface ComicResponse {
   comicId: number
   serie: string
   number: string
@@ -24,6 +34,7 @@ const currentRole = ref<UserRole | null>(getCurrentUserRole())
 const canCreateUsers = computed(() => canAccessCreateUserPage(currentRole.value))
 const canSeeComics = computed(() => canViewComics(currentRole.value))
 const canEditComics = computed(() => canManageComics(currentRole.value))
+const isLoggedIn = computed(() => currentRole.value !== null)
 const roleSummary = computed(() => {
   if (currentRole.value === null) {
     return 'No active role'
@@ -33,10 +44,53 @@ const roleSummary = computed(() => {
 })
 
 const comics = ref<ComicItem[]>([
-  { comicId: 1, serie: 'Nova Rift', number: '07', title: 'Broken Stars Archive' },
-  { comicId: 2, serie: 'Shadow Alley', number: '14', title: 'Last Train to Glassport' },
-  { comicId: 3, serie: 'Myth & Machine', number: '03', title: 'Clockwork Oracle' },
 ])
+const loadingComics = ref(false)
+
+function refreshCurrentRole(): void {
+  if (isSessionExpired()) {
+    clearCurrentUserRole()
+    currentRole.value = null
+    return
+  }
+
+  currentRole.value = getCurrentUserRole()
+}
+
+function loadComics(): void {
+  if (!canSeeComics.value) {
+    comics.value = []
+    return
+  }
+
+  loadingComics.value = true
+  feedback.value = ''
+
+  void apiRequest<ComicResponse[]>('/api/Comics')
+    .then((response) => {
+      comics.value = response.map((item) => ({
+        comicId: item.comicId,
+        serie: item.serie,
+        number: item.number,
+        title: item.title,
+      }))
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+      } else {
+        feedback.value = 'Unable to load comics right now.'
+      }
+    })
+    .finally(() => {
+      loadingComics.value = false
+    })
+}
+
+onMounted(() => {
+  refreshCurrentRole()
+  loadComics()
+})
 
 const newSerie = ref('')
 const newNumber = ref('')
@@ -71,10 +125,34 @@ function createComic(event: Event): void {
     return
   }
 
-  const nextId = comics.value.reduce((max, item) => Math.max(max, item.comicId), 0) + 1
-  comics.value = [...comics.value, { comicId: nextId, serie, number, title }]
-  feedback.value = `Comic ${serie} #${number} was added.`
-  resetCreateForm()
+  const actorUserId = getCurrentUserId()
+  if (actorUserId === null) {
+    feedback.value = 'Session expired. Please login again.'
+    return
+  }
+
+  void apiRequest('/api/Comics', {
+    method: 'POST',
+    body: JSON.stringify({
+      serie,
+      number,
+      title,
+      createdBy: actorUserId,
+    }),
+  })
+    .then(() => {
+      feedback.value = `Comic ${serie} #${number} was added.`
+      resetCreateForm()
+      loadComics()
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+        return
+      }
+
+      feedback.value = 'Unable to add comic right now.'
+    })
 }
 
 function beginEdit(comic: ComicItem): void {
@@ -107,11 +185,28 @@ function saveEdit(event: Event): void {
     return
   }
 
-  comics.value = comics.value.map((comic) =>
-    comic.comicId === editingComicId.value ? { ...comic, serie, number, title } : comic,
-  )
-  feedback.value = 'Comic updated.'
-  editingComicId.value = null
+  const comicId = editingComicId.value
+  void apiRequest(`/api/Comics/${comicId}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      serie,
+      number,
+      title,
+    }),
+  })
+    .then(() => {
+      feedback.value = 'Comic updated.'
+      editingComicId.value = null
+      loadComics()
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+        return
+      }
+
+      feedback.value = 'Unable to update comic right now.'
+    })
 }
 
 function cancelEdit(): void {
@@ -127,11 +222,25 @@ function removeComic(comicId: number): void {
     return
   }
 
-  comics.value = comics.value.filter((comic) => comic.comicId !== comicId)
-  if (editingComicId.value === comicId) {
-    editingComicId.value = null
-  }
-  feedback.value = 'Comic deleted.'
+  void apiRequest(`/api/Comics/${comicId}`, {
+    method: 'DELETE',
+  })
+    .then(() => {
+      if (editingComicId.value === comicId) {
+        editingComicId.value = null
+      }
+
+      feedback.value = 'Comic deleted.'
+      loadComics()
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) {
+        feedback.value = error.message
+        return
+      }
+
+      feedback.value = 'Unable to delete comic right now.'
+    })
 }
 
 function logout(): void {
@@ -155,7 +264,8 @@ function logout(): void {
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/about">About</RouterLink>
           <RouterLink v-if="canCreateUsers" to="/admin/users/create">Create User</RouterLink>
-          <button type="button" class="topbar-logout" @click="logout">Logout</button>
+          <RouterLink v-if="!isLoggedIn" class="login-link" to="/login">Login</RouterLink>
+          <button v-else type="button" class="topbar-logout" @click="logout">Logout</button>
         </nav>
       </header>
 
@@ -175,6 +285,10 @@ function logout(): void {
 
           <div v-if="!canEditComics" class="role-rules">
             <p>Comic management is restricted to Admin role.</p>
+          </div>
+
+          <div v-if="loadingComics" class="role-rules">
+            <p>Loading comics...</p>
           </div>
         </div>
 
