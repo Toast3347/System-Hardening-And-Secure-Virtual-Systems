@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: comic-realm-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_DB: comic_realm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - comic-network
+
+  backend:
+    build:
+      context: ./BE/ComicRealmBE
+      dockerfile: Dockerfile
+    container_name: comic-realm-api
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=postgres;Port=5432;Database=comic_realm;User Id=admin;Password=your_password_here;
+    depends_on:
+      - postgres
+    networks:
+      - comic-network
+
+  frontend:
+    build:
+      context: ./FE/ComicRealm
+      dockerfile: Dockerfile
+    container_name: comic-realm-web
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - comic-network
+
+volumes:
+  postgres_data:
+
+networks:
+  comic-network:
+    driver: bridge
