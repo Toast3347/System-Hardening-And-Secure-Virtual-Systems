@@ -64,7 +64,7 @@ namespace ComicRealmBE.Migrations
             migrationBuilder.InsertData(
                 table: "users",
                 columns: new[] { "user_id", "created_at", "created_by", "email", "is_active", "password_hash", "role", "updated_at" },
-                values: new object[] { 1, new DateTime(2026, 4, 14, 11, 5, 10, 470, DateTimeKind.Utc).AddTicks(3392), null, "superadmin@comicreal m.local", true, "$argon2id$v=19$m=19456,t=2,p=1$random salt$hash", 0, new DateTime(2026, 4, 14, 11, 5, 10, 470, DateTimeKind.Utc).AddTicks(3620) });
+                values: new object[] { 1, new DateTime(2026, 4, 14, 11, 5, 10, 0, DateTimeKind.Utc), null, "superadmin@comicreal m.local", true, "$argon2id$v=19$m=19456,t=2,p=1$random salt$hash", 0, new DateTime(2026, 4, 14, 11, 5, 10, 0, DateTimeKind.Utc) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_comics_created_by",

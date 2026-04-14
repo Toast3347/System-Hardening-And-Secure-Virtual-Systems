@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ComicRealmBE.Migrations
 {
     [DbContext(typeof(ComicRealmContext))]
-    [Migration("20260414110510_InitialCreate")]
+    [Migration("20260414114332_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -129,12 +129,12 @@ namespace ComicRealmBE.Migrations
                         new
                         {
                             UserId = 1,
-                            CreatedAt = new DateTime(2026, 4, 14, 11, 5, 10, 470, DateTimeKind.Utc).AddTicks(3392),
+                            CreatedAt = new DateTime(2026, 4, 14, 11, 5, 10, 0, DateTimeKind.Utc),
                             Email = "superadmin@comicreal m.local",
                             IsActive = true,
                             PasswordHash = "$argon2id$v=19$m=19456,t=2,p=1$random salt$hash",
                             Role = 0,
-                            UpdatedAt = new DateTime(2026, 4, 14, 11, 5, 10, 470, DateTimeKind.Utc).AddTicks(3620)
+                            UpdatedAt = new DateTime(2026, 4, 14, 11, 5, 10, 0, DateTimeKind.Utc)
                         });
                 });
 

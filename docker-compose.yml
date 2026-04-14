@@ -4,7 +4,7 @@ services:
     container_name: comic-realm-db
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_PASSWORD: Gr0up3!!!
       POSTGRES_DB: comic_realm
     ports:
       - "5432:5432"
@@ -23,7 +23,11 @@ services:
       - "8081:8081"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Server=postgres;Port=5432;Database=comic_realm;User Id=admin;Password=your_password_here;
+      Database__Host: postgres
+      Database__Port: "5432"
+      Database__UserId: admin
+      Database__Password: Gr0up3!!!
+      Database__Name: comic_realm
     depends_on:
       - postgres
     networks:

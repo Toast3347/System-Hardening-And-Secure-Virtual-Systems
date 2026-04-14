@@ -89,8 +89,8 @@ namespace ComicRealmBE.Data
                     PasswordHash = "$argon2id$v=19$m=19456,t=2,p=1$random salt$hash", // Placeholder - actual hash in migration
                     Role = Models.Enums.UserRole.SuperAdmin,
                     CreatedBy = null,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedAt = new DateTime(2026, 4, 14, 11, 5, 10, DateTimeKind.Utc),
+                    UpdatedAt = new DateTime(2026, 4, 14, 11, 5, 10, DateTimeKind.Utc),
                     IsActive = true
                 }
             );
