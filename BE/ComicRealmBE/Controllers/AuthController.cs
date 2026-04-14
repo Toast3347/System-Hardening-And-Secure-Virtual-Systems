@@ -1,6 +1,7 @@
 using ComicRealmBE.Models;
 using ComicRealmBE.Services;
 using Microsoft.AspNetCore.Mvc;
+using ComicRealmBE.Models.Enums;
 
 namespace ComicRealmBE.Controllers;
 
@@ -21,11 +22,11 @@ public class AuthController : ControllerBase
         // Replace this with your real DB lookup + password hash verification
         if (request.Username == "admin" && request.Password == "Password123!")
         {
-            var user = new UserModel
+            var user = new User
             {
-                Id = 1,
-                Username = "admin",
-                Role = Enums.UserRole.Admin
+                UserId = 1,
+                Email = "admin@example.com",
+                Role = UserRole.Admin
             };
 
             var token = _authService.GenerateJwtToken(user);
@@ -34,7 +35,7 @@ public class AuthController : ControllerBase
             {
                 token,
                 role = user.Role.ToString(),
-                username = user.Username
+                username = user.Email
             });
         }
 
