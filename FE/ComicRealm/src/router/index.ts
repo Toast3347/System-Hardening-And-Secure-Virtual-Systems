@@ -10,6 +10,9 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/about',
@@ -18,6 +21,9 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/login',
@@ -29,6 +35,7 @@ const router = createRouter({
       name: 'create-user',
       component: () => import('../views/CreateUserView.vue'),
       meta: {
+        requiresAuth: true,
         allowedRoles: [UserRole.SuperAdmin, UserRole.Admin],
       },
     },
@@ -36,16 +43,20 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  const requiresAuth = Boolean(to.meta.requiresAuth)
   const allowedRoles = to.meta.allowedRoles as UserRole[] | undefined
-
-  if (!allowedRoles || allowedRoles.length === 0) {
-    return true
-  }
-
   const currentRole = getCurrentUserRole()
 
-  if (currentRole === null) {
+  if (to.name === 'login' && currentRole !== null) {
+    return { name: 'home' }
+  }
+
+  if (requiresAuth && currentRole === null) {
     return { name: 'login' }
+  }
+
+  if (!requiresAuth || !allowedRoles || allowedRoles.length === 0) {
+    return true
   }
 
   if (!allowedRoles.includes(currentRole)) {

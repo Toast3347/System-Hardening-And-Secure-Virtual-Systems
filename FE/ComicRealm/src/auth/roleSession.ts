@@ -2,6 +2,12 @@ import { UserRole } from '../models/enums/UserRole'
 
 const ROLE_STORAGE_KEY = 'comicrealm.userRole'
 
+export const roleLabels: Record<UserRole, string> = {
+  [UserRole.SuperAdmin]: 'SuperAdmin',
+  [UserRole.Admin]: 'Admin',
+  [UserRole.Friend]: 'Friend',
+}
+
 export function getCurrentUserRole(): UserRole | null {
   const rawRole = localStorage.getItem(ROLE_STORAGE_KEY)
 
@@ -26,6 +32,10 @@ export function clearCurrentUserRole(): void {
   localStorage.removeItem(ROLE_STORAGE_KEY)
 }
 
+export function isAuthenticated(role: UserRole | null): boolean {
+  return role !== null
+}
+
 export function getCreatableRolesByActor(actorRole: UserRole | null): UserRole[] {
   if (actorRole === UserRole.SuperAdmin) {
     return [UserRole.Admin]
@@ -40,6 +50,14 @@ export function getCreatableRolesByActor(actorRole: UserRole | null): UserRole[]
 
 export function canAccessCreateUserPage(role: UserRole | null): boolean {
   return role === UserRole.SuperAdmin || role === UserRole.Admin
+}
+
+export function canViewComics(role: UserRole | null): boolean {
+  return role === UserRole.SuperAdmin || role === UserRole.Admin || role === UserRole.Friend
+}
+
+export function canManageComics(role: UserRole | null): boolean {
+  return role === UserRole.Admin
 }
 
 export function canCreateRole(actorRole: UserRole | null, targetRole: UserRole): boolean {

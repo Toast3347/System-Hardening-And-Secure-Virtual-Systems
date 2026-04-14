@@ -143,6 +143,17 @@ h1 {
     transform 0.2s ease;
 }
 
+.topbar-logout {
+  min-height: 2.6rem;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  color: #101522;
+  background: linear-gradient(135deg, #ffe08f, #f7b95e);
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .topbar a.router-link-exact-active {
   color: #101522;
   background: #f7c968;
@@ -202,7 +213,8 @@ h1 {
 }
 
 .button:hover,
-.topbar a:hover {
+.topbar a:hover,
+.topbar-logout:hover {
   transform: translateY(-1px);
 }
 
@@ -335,6 +347,12 @@ h1 {
 .shelf-card p,
 .highlight-card p {
   color: rgba(232, 239, 255, 0.75);
+}
+
+.comic-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 @media (max-width: 960px) {
