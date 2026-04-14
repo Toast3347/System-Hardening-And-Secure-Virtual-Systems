@@ -35,6 +35,22 @@ const canCreateUsers = computed(() => canAccessCreateUserPage(currentRole.value)
 const canSeeComics = computed(() => canViewComics(currentRole.value))
 const canEditComics = computed(() => canManageComics(currentRole.value))
 const isLoggedIn = computed(() => currentRole.value !== null)
+const comicCount = computed(() => comics.value.length)
+const capabilitySummary = computed(() => {
+  if (currentRole.value === UserRole.SuperAdmin) {
+    return 'Can create admins and monitor catalog access.'
+  }
+
+  if (currentRole.value === UserRole.Admin) {
+    return 'Full comic management and user provisioning.'
+  }
+
+  if (currentRole.value === UserRole.Friend) {
+    return 'Read-only comic browsing access.'
+  }
+
+  return 'Sign in to unlock role-based actions.'
+})
 const roleSummary = computed(() => {
   if (currentRole.value === null) {
     return 'No active role'
@@ -258,6 +274,7 @@ function logout(): void {
           <p class="eyebrow">ComicRealm</p>
           <h1>Role-based comic portal.</h1>
           <p class="lede">Signed in as: {{ roleSummary }}</p>
+          <p class="hero-support">{{ capabilitySummary }}</p>
         </div>
 
         <nav aria-label="Primary">
@@ -271,6 +288,12 @@ function logout(): void {
 
       <div v-if="canSeeComics" class="hero-grid">
         <div class="hero-copy">
+          <div class="hero-badges">
+            <span class="badge badge-strong">{{ roleSummary }}</span>
+            <span class="badge">{{ comicCount }} comics loaded</span>
+            <span class="badge">Backend synced</span>
+          </div>
+
           <p class="lede">
             Friends can view comics. Admins can add, edit, and delete comics. SuperAdmins can
             focus on user administration.
@@ -290,6 +313,21 @@ function logout(): void {
           <div v-if="loadingComics" class="role-rules">
             <p>Loading comics...</p>
           </div>
+
+          <dl class="stats">
+            <div>
+              <dt>Catalog size</dt>
+              <dd>{{ comicCount }}</dd>
+            </div>
+            <div>
+              <dt>Access mode</dt>
+              <dd>{{ canEditComics ? 'Write' : 'Read' }}</dd>
+            </div>
+            <div>
+              <dt>Session</dt>
+              <dd>{{ isLoggedIn ? 'Active' : 'Guest' }}</dd>
+            </div>
+          </dl>
         </div>
 
         <aside class="hero-panel" aria-label="Comic permissions">
@@ -299,6 +337,12 @@ function logout(): void {
             <p>
               Read access: SuperAdmin, Admin, Friend. Write access: Admin only.
             </p>
+
+            <div class="spotlight-meta">
+              <span>JWT secured</span>
+              <span>Role claims</span>
+              <span>Route guard</span>
+            </div>
           </div>
         </aside>
       </div>
@@ -312,9 +356,14 @@ function logout(): void {
       <div class="section-heading">
         <p class="eyebrow">Comics</p>
         <h2>Current comic catalog</h2>
+        <p>Live data from backend with role-filtered actions.</p>
       </div>
 
-      <div class="shelf-grid">
+      <div v-if="!loadingComics && comics.length === 0" class="role-rules">
+        <p>No comics available yet. Admins can add the first issue from the management section.</p>
+      </div>
+
+      <div v-else class="shelf-grid">
         <article v-for="comic in comics" :key="comic.comicId" class="shelf-card">
           <p class="shelf-meta">Issue {{ comic.number }}</p>
           <h3>{{ comic.serie }}</h3>

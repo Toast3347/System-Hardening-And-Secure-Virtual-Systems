@@ -60,7 +60,7 @@ function submitLogin(event: Event): void {
       <form class="login-form" @submit="submitLogin">
         <label>
           Username
-          <input v-model="username" type="text" placeholder="admin" required />
+          <input v-model="username" type="text" placeholder="Username" required />
         </label>
 
         <label>
