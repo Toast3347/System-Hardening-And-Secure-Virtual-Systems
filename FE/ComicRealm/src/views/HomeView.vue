@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { UserRole } from '../models/enums/UserRole'
+import { getCurrentUserRole } from '../auth/roleSession'
 
 const featuredShelves = [
   {
@@ -33,6 +36,11 @@ const highlights = [
     description: 'Track series, favorites, and special editions in one place without the clutter.',
   },
 ]
+
+const canCreateUsers = computed(() => {
+  const role = getCurrentUserRole()
+  return role === UserRole.SuperAdmin || role === UserRole.Admin
+})
 </script>
 
 <template>
@@ -47,6 +55,7 @@ const highlights = [
         <nav aria-label="Primary">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/about">About</RouterLink>
+          <RouterLink v-if="canCreateUsers" to="/admin/users/create">Create User</RouterLink>
           <RouterLink class="login-link" to="/login">Login</RouterLink>
         </nav>
       </header>

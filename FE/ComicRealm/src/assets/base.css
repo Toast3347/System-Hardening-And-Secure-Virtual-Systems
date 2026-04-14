@@ -593,6 +593,15 @@ h1 {
   color: #f8fbff;
 }
 
+.login-form select {
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fbff;
+}
+
 .login-form input::placeholder {
   color: rgba(232, 239, 255, 0.42);
 }
@@ -611,6 +620,113 @@ h1 {
 @media (max-width: 960px) {
   .login-page {
     padding: 1rem;
+  }
+}
+
+.create-user-page {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.create-user-shell {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  background: rgba(12, 17, 31, 0.72);
+  box-shadow: 0 30px 80px rgba(5, 10, 22, 0.35);
+}
+
+.create-user-header {
+  margin-bottom: 1.4rem;
+}
+
+.create-user-header h1 {
+  margin-bottom: 0.55rem;
+  max-width: 16ch;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+}
+
+.create-user-header p {
+  color: rgba(232, 239, 255, 0.78);
+}
+
+.create-user-header .eyebrow {
+  margin-bottom: 0.5rem;
+}
+
+.role-rules {
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.role-rules p {
+  color: rgba(232, 239, 255, 0.84);
+}
+
+.create-user-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.create-user-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: #eef2ff;
+  font-weight: 700;
+}
+
+.create-user-form input,
+.create-user-form select {
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fbff;
+}
+
+.create-user-form input::placeholder {
+  color: rgba(232, 239, 255, 0.42);
+}
+
+.access-denied,
+.creation-feedback {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+}
+
+.access-denied {
+  border: 1px solid rgba(255, 112, 112, 0.35);
+  background: rgba(255, 112, 112, 0.08);
+  color: #ffc9c9;
+}
+
+.creation-feedback {
+  border: 1px solid rgba(111, 241, 172, 0.35);
+  background: rgba(111, 241, 172, 0.08);
+  color: #d5ffe6;
+}
+
+.create-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 960px) {
+  .create-user-page {
+    padding: 1rem;
+  }
+
+  .create-user-shell {
+    padding: 1.3rem;
   }
 }
 
